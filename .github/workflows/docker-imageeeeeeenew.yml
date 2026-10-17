@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  validated:
+  validate:
     name: validate and build
     runs-on: ubuntu-latest
 
@@ -21,7 +21,7 @@ jobs:
       - name: Test Docker image 
         uses: docker compose build
   
-   deploy:
+  deploy:
     name: Deploy to EC2
     needs: validate
     runs-on: ubuntu-latest
