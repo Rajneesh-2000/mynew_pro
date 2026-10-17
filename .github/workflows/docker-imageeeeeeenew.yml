@@ -7,21 +7,34 @@ on:
       - main
 
 jobs:
-  deploy:
+  validated:
+    name: validate and build
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to EC44
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/myyyya/mynew_pro
-            git pull origin main
-            docker compose down
-            docker compose up -d --build
+      - name: validate docker compose
+        uses: docker compose config -q
+
+      - name: Test Docker image 
+        uses: docker compose build
+     
+  deploy:  
+     name: Deploy to EC44
+     needs: validate
+     runs-on: ubuntu-latest
+      
+     steps:
+        -name: Deploy to EC44
+         uses: appleboy/ssh-action@v1.2.2
+         with:
+           host: ${{ secrets.EC2_HOST }}
+           username: ${{ secrets.EC2_USER }}
+           key: ${{ secrets.EC2_SSH_KEY }}
+           script: |
+              cd /home/ubuntu/myyyya/mynew_pro
+              git pull origin main
+              docker compose down
+              docker compose up -d --build
